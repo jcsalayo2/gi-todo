@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "44127061472",
+    "project_id": "gi-todo",
+    "storage_bucket": "gi-todo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44127061472:android:4ebf8b4142119d8a459785",
+        "android_client_info": {
+          "package_name": "com.example.gitodo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwFJNJgXC8gW322vgu9uNl8UUs8xAFCMQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
