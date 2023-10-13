@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
       title: 'GI Todo',
       initialRoute: "/",
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xffd87a51)),
         useMaterial3: true,
       ),
       onGenerateRoute: FluroRouterClass.fluroRouter.generator,
