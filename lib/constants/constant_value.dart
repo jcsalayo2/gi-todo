@@ -1,0 +1,1 @@
+enum WelcomePageDisplay { welcomeMessage, login }
