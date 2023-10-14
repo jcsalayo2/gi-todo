@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gitodo/core/widgets/animated.dart';
 import 'package:gitodo/screen/welcome_page/bloc/welcome_bloc.dart';
 import 'package:gitodo/services/firebase_auth/firebase_auth.dart';
 import 'package:gitodo/styles/colors.dart';
@@ -57,33 +58,26 @@ class WelcomePage extends StatelessWidget {
                     bottom: MediaQuery.of(context).size.height * 0.05,
                     child: Align(
                       alignment: Alignment.bottomCenter,
-                      child: AnimatedPadding(
-                        duration: const Duration(milliseconds: 250),
-                        padding: EdgeInsets.only(
-                          bottom: state.showFunctionMessage ? 0 : 80,
-                        ),
-                        child: AnimatedOpacity(
-                          duration: const Duration(milliseconds: 250),
-                          opacity: state.showFunctionMessage ? 1 : 0,
-                          child: Container(
-                            margin: EdgeInsets.only(top: 30),
-                            padding: EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                              borderRadius: const BorderRadius.all(
-                                Radius.circular(30),
-                              ),
-                              border: Border.all(
-                                width: 3,
-                              ),
-                              color: ColorStyles.whiteTransparent,
+                      child: animatedInAndOut(
+                        isDisplayed: state.showFunctionMessage,
+                        component: Container(
+                          margin: EdgeInsets.only(top: 30),
+                          padding: EdgeInsets.all(15),
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(30),
                             ),
-                            child: Text(
-                              state.functionMessage,
-                              style: const TextStyle(
-                                fontFamily: 'Monday-Rain',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
+                            border: Border.all(
+                              width: 3,
+                            ),
+                            color: ColorStyles.whiteTransparent,
+                          ),
+                          child: Text(
+                            state.functionMessage,
+                            style: const TextStyle(
+                              fontFamily: 'Monday-Rain',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),

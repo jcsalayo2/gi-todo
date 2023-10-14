@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gitodo/constants/constant_text.dart';
 import 'package:gitodo/constants/constant_value.dart';
+import 'package:gitodo/core/widgets/animated.dart';
 import 'package:gitodo/screen/welcome_page/bloc/welcome_bloc.dart';
 import 'package:gitodo/styles/colors.dart';
 
@@ -25,17 +26,11 @@ class WelcomeMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedPadding(
-      curve: Curves.decelerate,
-      padding: EdgeInsets.only(
-          bottom: showBody ? 0 : 80,
-          left: MediaQuery.of(context).size.width < 840 ? 20 : 0,
-          right: MediaQuery.of(context).size.width < 840 ? 20 : 0),
-      duration: const Duration(milliseconds: 250),
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 250),
-        opacity: showBody ? 1 : 0,
-        child: Align(
+    return animatedInAndOut(
+        isDisplayed: showBody,
+        left: MediaQuery.of(context).size.width < 840 ? 20 : 0,
+        right: MediaQuery.of(context).size.width < 840 ? 20 : 0,
+        component: Align(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -72,9 +67,7 @@ class WelcomeMessage extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   List<Widget> welcomeBody(BuildContext context) {
