@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class FirebaseAuthService {
   final FirebaseAuth _firebaseAuth;
   final CollectionReference users =
-      FirebaseFirestore.instance.collection('buyers');
+      FirebaseFirestore.instance.collection('Users');
 
   FirebaseAuthService(this._firebaseAuth);
 
@@ -27,7 +27,18 @@ class FirebaseAuthService {
     try {
       await _firebaseAuth.createUserWithEmailAndPassword(
           email: email, password: password);
+      setUpUser();
       return true;
+    } on FirebaseAuthException catch (e) {
+      return e.message;
+    }
+  }
+
+  Future<dynamic> setUpUser() async {
+    try {
+      Map<String, dynamic> data = {};
+      await users.doc(FirebaseAuth.instance.currentUser!.uid).set(data);
+      _firebaseAuth.signOut();
     } on FirebaseAuthException catch (e) {
       return e.message;
     }

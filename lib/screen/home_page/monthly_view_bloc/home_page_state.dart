@@ -7,6 +7,7 @@ class HomePageState extends Equatable {
   final int displayMonth;
   final DateTime selectedDate;
   final List<ChecklistModel> checklist;
+  final DateTime dateTime; // Force Emit ONLY
 
   const HomePageState({
     required this.monthlyViewMaxRows,
@@ -15,6 +16,7 @@ class HomePageState extends Equatable {
     required this.displayYear,
     required this.selectedDate,
     required this.checklist,
+    required this.dateTime,
   });
 
   HomePageState.initial()
@@ -23,7 +25,8 @@ class HomePageState extends Equatable {
         displayMonth = DateTime.now().month,
         displayYear = DateTime.now().year,
         selectedDate = DateTime.now(),
-        checklist = [];
+        checklist = [],
+        dateTime = DateTime.now();
 
   @override
   List<Object> get props => [
@@ -33,6 +36,7 @@ class HomePageState extends Equatable {
         displayYear,
         selectedDate,
         checklist,
+        dateTime,
       ];
 
   HomePageState copyWith({
@@ -42,6 +46,7 @@ class HomePageState extends Equatable {
     int? displayYear,
     DateTime? selectedDate,
     List<ChecklistModel>? checklist,
+    DateTime? dateTime,
   }) {
     return HomePageState(
       monthlyViewMaxRows: monthlyViewMaxRows ?? this.monthlyViewMaxRows,
@@ -50,6 +55,7 @@ class HomePageState extends Equatable {
       displayYear: displayYear ?? this.displayYear,
       selectedDate: selectedDate ?? this.selectedDate,
       checklist: checklist ?? this.checklist,
+      dateTime: dateTime ?? this.dateTime,
     );
   }
 }

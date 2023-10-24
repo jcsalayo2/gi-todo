@@ -33,3 +33,22 @@ class ChangeChecklistEvent extends HomePageEvent {
 
   const ChangeChecklistEvent();
 }
+
+class AddTaskEvent extends HomePageEvent {
+  final DateTime date;
+  final String task;
+  @override
+  List<Object> get props => [];
+
+  const AddTaskEvent({required this.date, required this.task});
+}
+
+class MarkAsDoneEvent extends HomePageEvent {
+  final String id;
+  @override
+  List<Object> get props => [];
+
+  const MarkAsDoneEvent({
+    required this.id,
+  });
+}

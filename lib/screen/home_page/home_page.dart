@@ -7,7 +7,7 @@ import 'package:gitodo/core/extensions/datetime.dart';
 import 'package:gitodo/core/extensions/int.dart';
 import 'package:gitodo/core/extensions/map.dart';
 import 'package:gitodo/screen/home_page/monthly_view_bloc/home_page.dart';
-import 'package:gitodo/services/firebase_auth/checklist_service.dart';
+import 'package:gitodo/services/checklist_service.dart';
 import 'package:gitodo/services/firebase_auth/firebase_auth.dart';
 import 'package:gitodo/styles/attributes.dart';
 import 'package:gitodo/styles/colors.dart';
@@ -96,9 +96,49 @@ class _HomeBodyState extends State<HomeBody> {
                     ),
                     width: 400,
                     height: double.infinity,
-                    child: const SingleChildScrollView(
-                      physics: BouncingScrollPhysics(),
-                      child: Checklist(),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Expanded(
+                          child: SingleChildScrollView(
+                            physics: BouncingScrollPhysics(),
+                            child: Checklist(),
+                          ),
+                        ),
+                        Container(
+                          height: 50,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              BlocBuilder<HomePageBloc, HomePageState>(
+                                builder: (context, state) {
+                                  return IconButton(
+                                    onPressed: () {
+                                      showDialog(
+                                        barrierDismissible: false,
+                                        context: context,
+                                        builder: (BuildContext _) {
+                                          return AddTaskDialog(
+                                              initialDate: state.selectedDate,
+                                              addTask: (DateTime pickedDate,
+                                                  String task) {
+                                                BlocProvider.of<HomePageBloc>(
+                                                        context)
+                                                    .add(AddTaskEvent(
+                                                        date: pickedDate,
+                                                        task: task));
+                                              });
+                                        },
+                                      );
+                                    },
+                                    icon: const Icon(Icons.add),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
                     ),
                   ),
                   const SizedBox(
@@ -237,6 +277,92 @@ class _HomeBodyState extends State<HomeBody> {
   }
 }
 
+class AddTaskDialog extends StatefulWidget {
+  const AddTaskDialog({
+    super.key,
+    required this.initialDate,
+    required this.addTask,
+  });
+
+  final DateTime initialDate;
+  final Function(DateTime pickedDate, String task) addTask;
+
+  @override
+  State<AddTaskDialog> createState() => _AddTaskDialogState();
+}
+
+class _AddTaskDialogState extends State<AddTaskDialog> {
+  DateTime? pickedDate;
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: widget.initialDate,
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100));
+    if (picked != null) {
+      setState(() {
+        pickedDate = picked;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    pickedDate = widget.initialDate;
+  }
+
+  TextEditingController taskNameController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text('Add Task'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextButton(
+            onPressed: () => _selectDate(context),
+            child: Text(
+              DateFormat("yyyy-MM-dd").format(pickedDate!),
+            ),
+          ),
+          TextField(
+            onChanged: (String value) {
+              setState(() {});
+            },
+            controller: taskNameController,
+            textAlign: TextAlign.center,
+            decoration: const InputDecoration(
+              hintText: "Task",
+              counterText: "",
+            ),
+          )
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Text('CANCEL'),
+        ),
+        TextButton(
+          onPressed: taskNameController.text != ""
+              ? () {
+                  widget.addTask(pickedDate!, taskNameController.text);
+                  Navigator.pop(context);
+                }
+              : null,
+          child: Text('ADD'),
+        ),
+      ],
+    );
+  }
+}
+
 class Checklist extends StatelessWidget {
   const Checklist({
     super.key,
@@ -256,7 +382,12 @@ class Checklist extends StatelessWidget {
                 children: [
                   Checkbox(
                     value: task.isDone,
-                    onChanged: null,
+                    onChanged: task.isDone
+                        ? null
+                        : (value) {
+                            BlocProvider.of<HomePageBloc>(context)
+                                .add(MarkAsDoneEvent(id: task.id));
+                          },
                   ),
                   SizedBox(
                     width: 330,
@@ -266,6 +397,8 @@ class Checklist extends StatelessWidget {
                       softWrap: true,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
+                        decoration:
+                            task.isDone ? TextDecoration.lineThrough : null,
                         fontFamily: 'Monday-Rain',
                         fontSize: 24,
                       ),

@@ -7,7 +7,7 @@ import 'package:gitodo/constants/constant_value.dart';
 import 'package:gitodo/core/extensions/datetime.dart';
 import 'package:gitodo/core/extensions/int.dart';
 import 'package:gitodo/models/checklist_model.dart';
-import 'package:gitodo/services/firebase_auth/checklist_service.dart';
+import 'package:gitodo/services/checklist_service.dart';
 
 part 'home_page_event.dart';
 part 'home_page_state.dart';
@@ -20,6 +20,8 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
     on<MonthlyViewComputeForMaxRowsEvent>(_monthlyViewComputeForMaxRowsEvent);
     on<ChangeSelectedDateEvent>(_changeSelectedDate);
     on<ChangeChecklistEvent>(_changeChecklistEvent);
+    on<AddTaskEvent>(_addTask);
+    on<MarkAsDoneEvent>(_markAsDone);
   }
 
   FutureOr<void> _monthlyViewComputeForMaxRowsEvent(
@@ -66,5 +68,25 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
             state.displayYear, state.displayMonth, state.selectedDate.day));
 
     emit(state.copyWith(checklist: checklist));
+  }
+
+  FutureOr<void> _addTask(
+      AddTaskEvent event, Emitter<HomePageState> emit) async {
+    var checklist =
+        await ChecklistService().addTask(date: event.date, task: event.task);
+
+    if (checklist) {
+      add(ChangeChecklistEvent());
+    }
+  }
+
+  FutureOr<void> _markAsDone(
+      MarkAsDoneEvent event, Emitter<HomePageState> emit) async {
+    ChecklistService().markAsDone(id: event.id);
+
+    state.checklist.where((element) => element.id == event.id).first.isDone =
+        true;
+
+    emit(state.copyWith(dateTime: DateTime.now()));
   }
 }
