@@ -1,10 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gitodo/constants/constant_value.dart';
 import 'package:gitodo/constants/temporary_values.dart';
 import 'package:gitodo/core/extensions/datetime.dart';
 import 'package:gitodo/core/extensions/int.dart';
 import 'package:gitodo/core/extensions/map.dart';
+import 'package:gitodo/screen/home_page/monthly_view_bloc/home_page.dart';
+import 'package:gitodo/services/firebase_auth/checklist_service.dart';
 import 'package:gitodo/services/firebase_auth/firebase_auth.dart';
 import 'package:gitodo/styles/attributes.dart';
 import 'package:gitodo/styles/colors.dart';
@@ -35,212 +38,270 @@ class HomePage extends StatelessWidget {
   }
 }
 
-class HomeBody extends StatelessWidget {
-  HomeBody({
+class HomeBody extends StatefulWidget {
+  const HomeBody({
     super.key,
     required this.auth,
-    this.tempDate = 1,
   });
 
   final FirebaseAuth auth;
-  int tempDate;
 
   @override
+  State<HomeBody> createState() => _HomeBodyState();
+}
+
+class _HomeBodyState extends State<HomeBody> {
+  int tempDate = 1;
+  @override
   Widget build(BuildContext context) {
+    bool isWebView = MediaQuery.of(context).size.width > 900;
     Map<int, String> arrangeByFirstDay =
         days.arrangeByFirstDay(startOfTheWeek) as Map<int, String>;
-    tempDate = 1;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: Attributes.borderRadiusAll30,
-                border: Attributes.borderAll3,
-                color: ColorStyles.whiteTransparent,
-              ),
-              height: 50,
-              width: 200,
-            ),
-          ],
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        Expanded(
-          child: Row(
+    return BlocProvider(
+      create: (context) => HomePageBloc()
+        ..add(const MonthlyViewComputeForMaxRowsEvent(
+          startOfTheWeek: startOfTheWeek,
+        ))
+        ..add(const ChangeChecklistEvent()),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              if (MediaQuery.of(context).size.width > 900) ...[
-                Container(
-                  padding: EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    borderRadius: Attributes.borderRadiusAll30,
-                    border: Attributes.borderAll3,
-                    color: ColorStyles.whiteTransparent,
-                  ),
-                  width: 400,
-                  height: double.infinity,
-                  child: SingleChildScrollView(
-                    physics: BouncingScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Text(
-                            DateFormat("yyyy-MM-dd").format(DateTime.now()),
-                            style: TextStyle(
-                              fontFamily: 'Monday-Rain',
-                              fontSize: 24,
-                            ),
-                          ),
-                        ),
-                        for (var i = 0; i < 5; i += 1)
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Checkbox(
-                                value: false,
-                                onChanged: null,
-                              ),
-                              SizedBox(
-                                width: 330,
-                                child: Text(
-                                  "Be Amazing.",
-                                  maxLines: 3,
-                                  softWrap: true,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Monday-Rain',
-                                    fontSize: 24,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: Attributes.borderRadiusAll30,
+                  border: Attributes.borderAll3,
+                  color: ColorStyles.whiteTransparent,
                 ),
-                const SizedBox(
-                  width: 20,
-                ),
-              ],
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    borderRadius: Attributes.borderRadiusAll30,
-                    border: Attributes.borderAll3,
-                    color: ColorStyles.whiteTransparent,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          for (var day in arrangeByFirstDay.entries)
-                            Expanded(
-                                child: Container(
-                              margin: EdgeInsets.all(5),
-                              child: Text(
-                                day.value,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: 'Monday-Rain',
-                                ),
-                              ),
-                            )),
-                        ],
-                      ),
-                      for (int row = 0;
-                          row <
-                              getMaxRows(
-                                  displayedYear: displayedYear,
-                                  displayedMonth: displayedMonth,
-                                  startOfTheWeek: startOfTheWeek);
-                          row++)
-                        Expanded(
-                          child: Row(
-                            children: [
-                              // for (int day = 1; day <= 7; day++)
-                              for (var day in arrangeByFirstDay.entries)
-                                Expanded(
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius:
-                                          Attributes.borderRadiusAll30,
-                                      border: Attributes.borderAll3,
-                                      color: ColorStyles.dateColor,
-                                    ),
-                                    padding: const EdgeInsets.all(15),
-                                    height: double.infinity,
-                                    margin: EdgeInsets.all(5),
-                                    child: displayPerDate(day: day.key),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        )
-                    ],
-                  ),
-                ),
+                height: 50,
+                width: 200,
               ),
             ],
           ),
-        ),
-      ],
+          const SizedBox(
+            height: 20,
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                if (isWebView) ...[
+                  Container(
+                    padding: EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      borderRadius: Attributes.borderRadiusAll30,
+                      border: Attributes.borderAll3,
+                      color: ColorStyles.whiteTransparent,
+                    ),
+                    width: 400,
+                    height: double.infinity,
+                    child: const SingleChildScrollView(
+                      physics: BouncingScrollPhysics(),
+                      child: Checklist(),
+                    ),
+                  ),
+                  const SizedBox(
+                    width: 20,
+                  ),
+                ],
+                Expanded(
+                  child: Container(
+                    padding: EdgeInsets.all(isWebView ? 15 : 0),
+                    decoration: BoxDecoration(
+                      borderRadius: Attributes.borderRadiusAll30,
+                      border: Attributes.borderAll3,
+                      color: ColorStyles.whiteTransparent,
+                    ),
+                    child: BlocBuilder<HomePageBloc, HomePageState>(
+                      builder: (context, state) {
+                        tempDate = 1;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              children: [
+                                for (var weekDay in arrangeByFirstDay.entries)
+                                  Expanded(
+                                      child: Container(
+                                    margin: EdgeInsets.all(15),
+                                    child: Text(
+                                      isWebView
+                                          ? weekDay.value
+                                          : weekDay.value[0],
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        fontFamily: 'Monday-Rain',
+                                      ),
+                                    ),
+                                  )),
+                              ],
+                            ),
+                            for (int row = 0;
+                                row < state.monthlyViewMaxRows;
+                                row++)
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    // for (int day = 1; day <= 7; day++)
+                                    for (var (index, day)
+                                        in arrangeByFirstDay.entries.indexed)
+                                      Builder(builder: (context) {
+                                        final int? date =
+                                            getDatePerCell(day: day.key);
+                                        return Expanded(
+                                          child: InkWell(
+                                            onTap: date != null
+                                                ? () {
+                                                    BlocProvider.of<
+                                                                HomePageBloc>(
+                                                            context)
+                                                        .add(
+                                                            ChangeSelectedDateEvent(
+                                                                date: date));
+                                                  }
+                                                : null,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                borderRadius: () {
+                                                  if (isWebView) {
+                                                    return Attributes
+                                                        .borderRadiusAll30;
+                                                  } else if (row ==
+                                                          state.monthlyViewMaxRows -
+                                                              1 &&
+                                                      index == 0) {
+                                                    return Attributes
+                                                        .borderRadiusBottomLeft30;
+                                                  } else if (row ==
+                                                          state.monthlyViewMaxRows -
+                                                              1 &&
+                                                      index == 6) {
+                                                    return Attributes
+                                                        .borderRadiusBottomRight30;
+                                                  }
+                                                  return null;
+                                                }(),
+                                                border: isWebView
+                                                    ? Attributes.borderAll3
+                                                    : Attributes.borderAll1,
+                                                color: ColorStyles.dateColor,
+                                              ),
+                                              padding: const EdgeInsets.all(15),
+                                              height: double.infinity,
+                                              margin: EdgeInsets.all(
+                                                  isWebView ? 5 : 0),
+                                              child: displayPerDate(date: date),
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                  ],
+                                ),
+                              )
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  displayPerDate({required int day}) {
-    String displayDate = '';
+  int? getDatePerCell({required int day}) {
+    int? cellDate;
     if (tempDate >
         DateTime(displayedYear, displayedMonth, tempDate).lastDayOfMonth) {
-      displayDate = '';
+      cellDate = null;
     } else if (DateTime(displayedYear, displayedMonth, tempDate).weekday ==
         day) {
-      displayDate = tempDate.toString();
+      cellDate = tempDate;
       tempDate++;
     }
+    return cellDate;
+  }
 
-    if (displayDate == '') return null;
-
+  displayPerDate({required int? date}) {
     return Text(
-      displayDate,
-      style: TextStyle(
+      (date ?? "").toString(),
+      style: const TextStyle(
         fontFamily: "Monday-Rain",
         color: Colors.white,
       ),
     );
   }
+}
 
-  int getMaxRows(
-      {required int displayedYear,
-      required int displayedMonth,
-      required int startOfTheWeek}) {
-    var endOfWeek = startOfTheWeek.lastDayOfWeek;
+class Checklist extends StatelessWidget {
+  const Checklist({
+    super.key,
+  });
 
-    final selectedLastDate =
-        DateTime(displayedYear, displayedMonth).lastDateOfMonth;
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomePageBloc, HomePageState>(
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SelectedDateTitle(),
+            for (var task in state.checklist)
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Checkbox(
+                    value: task.isDone,
+                    onChanged: null,
+                  ),
+                  SizedBox(
+                    width: 330,
+                    child: Text(
+                      task.task,
+                      maxLines: 3,
+                      softWrap: true,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Monday-Rain',
+                        fontSize: 24,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
 
-    int maxRows = 0;
-    int lastDateOfEndOfWeek = 0;
+class SelectedDateTitle extends StatelessWidget {
+  const SelectedDateTitle({
+    super.key,
+  });
 
-    for (int i = 1; i <= selectedLastDate.day; i++) {
-      if (DateTime(displayedYear, displayedMonth, i).weekday == endOfWeek) {
-        maxRows++;
-        lastDateOfEndOfWeek = DateTime(displayedYear, displayedMonth, i).day;
-      }
-    }
-
-    if (lastDateOfEndOfWeek < selectedLastDate.day) {
-      maxRows++;
-    }
-
-    return maxRows;
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomePageBloc, HomePageState>(
+      builder: (context, state) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Text(
+            state.selectedDate.isSameDate(DateTime.now())
+                ? "Today"
+                : DateFormat("yyyy-MM-dd").format(state.selectedDate),
+            style: const TextStyle(
+              fontFamily: 'Monday-Rain',
+              fontSize: 24,
+            ),
+          ),
+        );
+      },
+    );
   }
 }

@@ -11,3 +11,6 @@ Map<int, String> days = {
   6: "Satuday",
   7: "Sunday",
 };
+
+// ignore: constant_identifier_names
+enum CalendarView { Monthly, Weekly }
