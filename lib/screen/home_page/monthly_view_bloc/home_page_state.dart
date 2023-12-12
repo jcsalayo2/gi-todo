@@ -24,7 +24,8 @@ class HomePageState extends Equatable {
         calendarView = CalendarView.Monthly,
         displayMonth = DateTime.now().month,
         displayYear = DateTime.now().year,
-        selectedDate = DateTime.now(),
+        selectedDate = DateTime(
+            DateTime.now().year, DateTime.now().month, DateTime.now().day),
         checklist = [],
         dateTime = DateTime.now();
 

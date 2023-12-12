@@ -8,24 +8,40 @@ class ChecklistService {
 
   Future<List<ChecklistModel>> fetchChecklistByDate(
       {required DateTime date}) async {
-    List<ChecklistModel> checklist = [];
+    // List<ChecklistModel> checklist = [];
 
-    await users
+    var qSnapShot = await users
         .doc(FirebaseAuth.instance.currentUser!.uid)
         .collection("checklist")
         .where(Filter.and(
           Filter("date", isGreaterThanOrEqualTo: date),
           Filter("date", isLessThan: date.add(const Duration(days: 1))),
         ))
-        .get()
-        .then((snapshot) {
-      for (var element in snapshot.docs) {
-        Map<String, dynamic> response = element.data();
-        checklist.add(ChecklistModel.fromJson(response));
-      }
-    });
+        .orderBy("date")
+        .orderBy("dateTimeAdded", descending: false)
+        .get();
 
-    return checklist;
+    return qSnapShot.docs.map((doc) {
+      Map<String, dynamic> response = doc.data();
+      return ChecklistModel.fromJson(response);
+    }).toList();
+
+    // await users
+    //     .doc(FirebaseAuth.instance.currentUser!.uid)
+    //     .collection("checklist")
+    //     .where(Filter.and(
+    //       Filter("date", isGreaterThanOrEqualTo: date),
+    //       Filter("date", isLessThan: date.add(const Duration(days: 1))),
+    //     ))
+    //     .get()
+    //     .then((snapshot) {
+    //   for (var element in snapshot.docs) {
+    //     Map<String, dynamic> response = element.data();
+    //     checklist.add(ChecklistModel.fromJson(response));
+    //   }
+    // });
+
+    // return checklist;
   }
 
   Future<bool> markAsDone({required String id}) async {
@@ -55,12 +71,13 @@ class ChecklistService {
           .doc()
           .id;
 
-      Map<String, dynamic> data = {
-        "date": date,
-        "isDone": false,
-        "task": task,
-        "id": id,
-      };
+      var data = ChecklistModel(
+              date: date,
+              task: task,
+              isDone: false,
+              id: id,
+              dateTimeAdded: DateTime.now())
+          .toJson();
 
       await users
           .doc(FirebaseAuth.instance.currentUser!.uid)

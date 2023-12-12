@@ -52,3 +52,15 @@ class MarkAsDoneEvent extends HomePageEvent {
     required this.id,
   });
 }
+
+class ChangeDisplayedMonthYear extends HomePageEvent {
+  final int year;
+  final int month;
+  @override
+  List<Object> get props => [];
+
+  const ChangeDisplayedMonthYear({
+    required this.year,
+    required this.month,
+  });
+}

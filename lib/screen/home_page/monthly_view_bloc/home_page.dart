@@ -22,6 +22,7 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
     on<ChangeChecklistEvent>(_changeChecklistEvent);
     on<AddTaskEvent>(_addTask);
     on<MarkAsDoneEvent>(_markAsDone);
+    on<ChangeDisplayedMonthYear>(_changeSelectedMonthYear);
   }
 
   FutureOr<void> _monthlyViewComputeForMaxRowsEvent(
@@ -55,10 +56,10 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
 
   FutureOr<void> _changeSelectedDate(
       ChangeSelectedDateEvent event, Emitter<HomePageState> emit) async {
-    add(ChangeChecklistEvent());
     emit(state.copyWith(
         selectedDate:
             DateTime(state.displayYear, state.displayMonth, event.date)));
+    add(const ChangeChecklistEvent());
   }
 
   FutureOr<void> _changeChecklistEvent(
@@ -76,7 +77,7 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
         await ChecklistService().addTask(date: event.date, task: event.task);
 
     if (checklist) {
-      add(ChangeChecklistEvent());
+      add(const ChangeChecklistEvent());
     }
   }
 
@@ -88,5 +89,14 @@ class HomePageBloc extends Bloc<HomePageEvent, HomePageState> {
         true;
 
     emit(state.copyWith(dateTime: DateTime.now()));
+  }
+
+  FutureOr<void> _changeSelectedMonthYear(
+      ChangeDisplayedMonthYear event, Emitter<HomePageState> emit) {
+    emit(state.copyWith(
+      displayMonth: event.month,
+      displayYear: event.year,
+      dateTime: DateTime.now(),
+    ));
   }
 }

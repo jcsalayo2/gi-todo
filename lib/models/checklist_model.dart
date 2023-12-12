@@ -16,12 +16,14 @@ class ChecklistModel {
   DateTime date;
   bool isDone;
   String task;
+  DateTime dateTimeAdded;
 
   ChecklistModel({
     required this.id,
     required this.date,
     required this.isDone,
     required this.task,
+    required this.dateTimeAdded,
   });
 
   factory ChecklistModel.fromJson(Map<String, dynamic> json) => ChecklistModel(
@@ -29,6 +31,7 @@ class ChecklistModel {
         date: (json["date"] as Timestamp).toDate(),
         isDone: json["isDone"],
         task: json["task"],
+        dateTimeAdded: json["dateTimeAdded"].toDate(),
       );
 
   Map<String, dynamic> toJson() => {
@@ -36,5 +39,6 @@ class ChecklistModel {
         "date": date,
         "isDone": isDone,
         "task": task,
+        "dateTimeAdded": dateTimeAdded,
       };
 }
